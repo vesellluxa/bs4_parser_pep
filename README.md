@@ -37,3 +37,8 @@
 pretty - выводит данные в командной строке в таблице.
 file - сохраняет информацию в формате CSV в папке `./src/results/` .
 `python main.py [парсер] -o pretty / file // -output pretty / file`
+# Автор - Алексей Шевич
+# Стек:
+## beautifulsoup4==4.9.3
+## tqdm==4.61.0
+

@@ -12,3 +12,7 @@ class NothingFoundException(Exception):
 
 class PrintException(Exception):
     pass
+
+
+class PrintLoggingInfo(Exception):
+    pass
