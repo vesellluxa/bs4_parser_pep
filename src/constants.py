@@ -11,9 +11,9 @@ UNIX_DIALECT = 'unix'
 
 BASE_DIR = Path(__file__).parent
 
-DOWNLOADS_DIR = BASE_DIR / 'downloads'
+DOWNLOADS = 'downloads'
 
-RESULTS_DIR = BASE_DIR / 'results'
+RESULTS = 'results'
 
 LOG_DIR = BASE_DIR / 'logs'
 

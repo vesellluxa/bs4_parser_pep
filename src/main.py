@@ -8,7 +8,7 @@ from urllib.parse import urljoin
 
 from configs import configure_argument_parser, configure_logging
 from constants import (BASE_DIR, EXPECTED_STATUS, MAIN_DOC_URL, PEP_LIST_URL,
-                       DOWNLOAD_URL, DOWNLOADS_DIR)
+                       DOWNLOAD_URL, DOWNLOADS)
 from exceptions import NothingFoundException, PrintLoggingInfo
 from outputs import control_output
 from utils import find_tag, get_response
@@ -112,8 +112,9 @@ def download(session):
     )
     archive_url = urljoin(DOWNLOAD_URL, pdf_a4_tag['href'])
     filename = archive_url.split('/')[-1]
-    DOWNLOADS_DIR.mkdir(exist_ok=True)
-    archive_path = DOWNLOADS_DIR / filename
+    downloads_dir = BASE_DIR / DOWNLOADS
+    downloads_dir.mkdir(exist_ok=True)
+    archive_path = downloads_dir / filename
     response = session.get(archive_url)
     with open(archive_path, 'wb') as file:
         file.write(response.content)
