@@ -54,4 +54,6 @@ OUTPUTS = {
 
 
 def control_output(results, cli_args):
-    OUTPUTS[DEFAULT if cli_args.output is None else cli_args.output](results, cli_args)
+    OUTPUTS[
+        DEFAULT if cli_args.output is None else cli_args.output
+    ](results, cli_args)
