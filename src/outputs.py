@@ -5,7 +5,8 @@ import logging
 from csv import unix_dialect
 from prettytable import PrettyTable
 
-from constants import BASE_DIR, DATETIME_FORMAT, PRETTY_OUTPUT_CONSTANT, FILE_OUTPUT_CONSTANT, RESULTS
+from constants import (BASE_DIR, DATETIME_FORMAT,
+                       PRETTY_OUTPUT_CONSTANT, FILE_OUTPUT_CONSTANT, RESULTS)
 from exceptions import PrintException
 
 FILE_OUTPUT_LOGGING = 'CSV файл с результатами сохранён по адресу: {file_path}'

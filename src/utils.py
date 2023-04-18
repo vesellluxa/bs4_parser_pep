@@ -30,7 +30,10 @@ def get_response(session, url, encoding='utf-8'):
 
 
 def create_soup(session, url):
-    return BeautifulSoup(get_response(session, url).text, features=BEAUTIFUL_SOUP_FEATURE_ARGUMENT)
+    return BeautifulSoup(
+        get_response(session, url).text,
+        features=BEAUTIFUL_SOUP_FEATURE_ARGUMENT
+    )
 
 
 def find_tag(soup, tag, attrs=None):

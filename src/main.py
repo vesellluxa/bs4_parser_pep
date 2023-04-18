@@ -2,14 +2,13 @@ import logging
 import re
 import requests_cache
 
-from bs4 import BeautifulSoup
 from tqdm import tqdm
 from urllib.parse import urljoin
 
 from configs import configure_argument_parser, configure_logging
 from constants import (BASE_DIR, EXPECTED_STATUS, MAIN_DOC_URL, PEP_LIST_URL,
                        DOWNLOAD_URL, DOWNLOADS)
-from exceptions import NothingFoundException, PrintLoggingInfo
+from exceptions import NothingFoundException
 from outputs import control_output
 from utils import find_tag, create_soup
 
