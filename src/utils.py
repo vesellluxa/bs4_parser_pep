@@ -1,8 +1,11 @@
 import logging
 
+from bs4 import BeautifulSoup
 from requests import RequestException
 
-from exceptions import ParserFindTagException, EmptyResponseException
+from constants import BEAUTIFUL_SOUP_FEATURE_ARGUMENT
+from exceptions import ParserFindTagException
+
 
 EMPTY_RESPONSE_MESSAGE = 'Ответ от {url} не получен.'
 
@@ -16,15 +19,18 @@ def get_response(session, url, encoding='utf-8'):
         response = session.get(url)
         response.encoding = encoding
         if response is None:
-            raise EmptyResponseException(
+            raise ValueError(
                 EMPTY_RESPONSE_MESSAGE.format(url=url)
             )
         return response
     except RequestException:
-        logging.exception(
+        raise ValueError(
             REQUEST_EXCEPTION_MESSAGE.format(url=url),
-            stack_info=True
         )
+
+
+def create_soup(session, url):
+    return BeautifulSoup(get_response(session, url).text, features=BEAUTIFUL_SOUP_FEATURE_ARGUMENT)
 
 
 def find_tag(soup, tag, attrs=None):

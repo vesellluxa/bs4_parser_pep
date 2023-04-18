@@ -11,7 +11,7 @@ from constants import (BASE_DIR, EXPECTED_STATUS, MAIN_DOC_URL, PEP_LIST_URL,
                        DOWNLOAD_URL, DOWNLOADS)
 from exceptions import NothingFoundException, PrintLoggingInfo
 from outputs import control_output
-from utils import find_tag, get_response
+from utils import find_tag, create_soup
 
 PATTERN = r'Python (?P<version>\d\.\d+) \((?P<status>.*)\)'
 
@@ -38,11 +38,6 @@ PARSER_START_LOGGING_INFO = 'Парсер запущен!'
 PARSER_START_ARGS_LOGGING_INFO = 'Аргументы при запуске: {args}'
 
 PARSER_COMPLETED_WORK = 'Парсер завершил работу!'
-
-
-def create_soup(session, url):
-    response = get_response(session, url)
-    return BeautifulSoup(response.text, 'lxml')
 
 
 def whats_new(session):
@@ -134,6 +129,7 @@ def pep(session):
     pep_lines = pep_list.find_all('tr')
     pep_count, status_counter = 0, 0
     results = [('Статус', 'Количество')]
+    exceptions = []
     for pep_line in tqdm(pep_lines):
         pep_count += 1
         short_status = pep_line.find('td').text[1:]
@@ -141,30 +137,33 @@ def pep(session):
             status_ext = EXPECTED_STATUS[short_status]
         except KeyError:
             status_ext = []
-            raise PrintLoggingInfo(
+            exceptions.append(ValueError(
                 PEP_LOGGING_INFO.format(short_status=short_status,
                                         pep_line=pep_line)
-            )
+            ))
         link = find_tag(pep_line, 'a')['href']
         pep_line_link = urljoin(PEP_LIST_URL, link)
         soup = create_soup(session, pep_line_link)
         dl_tag = find_tag(soup, 'dl')
         status = dl_tag.find(string='Status')
         if not status:
-            PrintLoggingInfo(NO_STATUS_LOGGING_INFO.format(
+            exceptions.append(ValueError(NO_STATUS_LOGGING_INFO.format(
                 pep_line_link=pep_line_link
-            ))
+            )))
         status = status.find_parent()
         status_num = status.next_sibling.next_sibling.string
         if status_num not in status_ext:
-            raise PrintLoggingInfo(
+            exceptions.append(ValueError(
                 STATUS_MISMATCH_LOGGING_INFO.format(
                     pep_line_link=pep_line_link,
                     status_num=status_num,
                     status_ext=status_ext
                 )
-            )
+            ))
         status_counter += 1
+    if exceptions:
+        for exception in exceptions:
+            raise exception
     if pep_count != status_counter:
         logging.error(
             f'\n Ошибка в сумме:\n'
@@ -193,16 +192,16 @@ def main():
     logging.info(PARSER_START_ARGS_LOGGING_INFO.format(
         args=args
     ))
-    session = requests_cache.CachedSession()
-    if args.clear_cache:
-        session.cache.clear()
-    parser_mode = args.mode
     try:
+        session = requests_cache.CachedSession()
+        if args.clear_cache:
+            session.cache.clear()
+        parser_mode = args.mode
         results = MODE_TO_FUNCTION[parser_mode](session)
-    except PrintLoggingInfo as error:
+        if results is not None:
+            control_output(results, args)
+    except BaseException as error:
         logging.info(error)
-    if results is not None:
-        control_output(results, args)
     logging.info(PARSER_COMPLETED_WORK)
 
 
