@@ -1,11 +1,9 @@
 from pathlib import Path
 from urllib.parse import urljoin
 
-BEAUTIFUL_SOUP_FEATURE_ARGUMENT = 'lxml'
+PRETTY_OUTPUT = 'pretty'
 
-PRETTY_OUTPUT_CONSTANT = 'pretty'
-
-FILE_OUTPUT_CONSTANT = 'file'
+FILE_OUTPUT = 'file'
 
 BASE_DIR = Path(__file__).parent
 

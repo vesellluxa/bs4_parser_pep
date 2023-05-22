@@ -6,7 +6,7 @@ from csv import unix_dialect
 from prettytable import PrettyTable
 
 from constants import (BASE_DIR, DATETIME_FORMAT,
-                       PRETTY_OUTPUT_CONSTANT, FILE_OUTPUT_CONSTANT, RESULTS)
+                       PRETTY_OUTPUT, FILE_OUTPUT, RESULTS)
 from exceptions import PrintException
 
 FILE_OUTPUT_LOGGING = 'CSV файл с результатами сохранён по адресу: {file_path}'
@@ -48,8 +48,8 @@ def default_output(results, cli_args):
 
 
 OUTPUTS = {
-    PRETTY_OUTPUT_CONSTANT: pretty_output,
-    FILE_OUTPUT_CONSTANT: file_output,
+    PRETTY_OUTPUT: pretty_output,
+    FILE_OUTPUT: file_output,
     None: default_output
 }
 

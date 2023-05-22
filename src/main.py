@@ -13,29 +13,21 @@ from outputs import control_output
 from utils import find_tag, create_soup
 
 PATTERN = r'Python (?P<version>\d\.\d+) \((?P<status>.*)\)'
-
-FILE_EXTENSIONS = r'.+pdf-a4\.zip$'
-
+URL_REGEX = re.compile(r'.+pdf-a4\.zip$')
+NOTHING_FOUND_EXCEPTION_INFO = 'Ничего не найдено!'
 DOWNLOAD_LOGGING_INFO = 'Архив сохранён: {archive_path}'
-
 PEP_LOGGING_INFO = ('\nНекорректный статус в общем списке: {short_status}\n'
                     'Строка PEP: {pep_line}')
-
 NO_STATUS_LOGGING_INFO = 'Не найдена строка статуса! {pep_line_link}'
-
 STATUS_MISMATCH_LOGGING_INFO = ('\nНесовпадение статусов:\n'
                                 '{pep_line_link}\n'
                                 'Статус в карточке - {status_num}\n'
                                 'Ожидаемые статусы - {status_ext}')
-
 SUM_MISMATCH_LOGGING_INFO = ('\n Ошибка в сумме:\n'
                              'Всего PEP: {pep_count}'
                              'Статусов из карточек: {status_counter}')
-
 PARSER_START_LOGGING_INFO = 'Парсер запущен!'
-
 PARSER_START_ARGS_LOGGING_INFO = 'Аргументы при запуске: {args}'
-
 PARSER_COMPLETED_WORK = 'Парсер завершил работу!'
 
 
@@ -82,7 +74,7 @@ def latest_versions(session):
             a_tags = ul.find_all('a')
             break
     else:
-        raise NothingFoundException('Ничего не найдено!')
+        raise NothingFoundException(NOTHING_FOUND_EXCEPTION_INFO)
     results = [('Ссылка на документацию', 'Версия', 'Статус')]
     for a_tag in tqdm(a_tags):
         link = a_tag['href']
@@ -102,7 +94,7 @@ def download(session):
     pdf_a4_tag = find_tag(
         link_table,
         'a',
-        attrs={'href': re.compile(FILE_EXTENSIONS)}
+        attrs={'href': URL_REGEX}
     )
     archive_url = urljoin(DOWNLOAD_URL, pdf_a4_tag['href'])
     filename = archive_url.split('/')[-1]
@@ -199,7 +191,7 @@ def main():
         results = MODE_TO_FUNCTION[parser_mode](session)
         if results is not None:
             control_output(results, args)
-    except BaseException as error:
+    except Exception as error:
         logging.info(error)
     logging.info(PARSER_COMPLETED_WORK)
 
