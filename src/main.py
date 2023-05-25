@@ -143,15 +143,7 @@ def download(session):
 
 
 def pep(session):
-    try:
-        soup = create_soup(session, PEP_LIST_URL)
-    except Exception as error:
-        raise FailedSoupCreationException(
-            FAILED_CREATE_SOUP_INFO.format(
-                url=PEP_LIST_URL,
-                error=error
-            )
-        )
+    soup = create_soup(session, PEP_LIST_URL)
     index = find_tag(
         soup,
         'section',
