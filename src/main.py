@@ -8,7 +8,7 @@ from urllib.parse import urljoin
 from configs import configure_argument_parser, configure_logging
 from constants import (BASE_DIR, EXPECTED_STATUS, MAIN_DOC_URL, PEP_LIST_URL,
                        DOWNLOAD_URL, DOWNLOADS)
-from exceptions import NothingFoundException
+from exceptions import NothingFoundException, FailedSoupCreationException
 from outputs import control_output
 from utils import find_tag, create_soup
 
@@ -29,11 +29,20 @@ SUM_MISMATCH_LOGGING_INFO = ('\n Ошибка в сумме:\n'
 PARSER_START_LOGGING_INFO = 'Парсер запущен!'
 PARSER_START_ARGS_LOGGING_INFO = 'Аргументы при запуске: {args}'
 PARSER_COMPLETED_WORK = 'Парсер завершил работу!'
+FAILED_CREATE_SOUP_INFO = 'Не удалось создать SOUP! {url}, {error}'
 
 
 def whats_new(session):
     whats_new_url = urljoin(MAIN_DOC_URL, 'whatsnew/')
-    soup = create_soup(session, whats_new_url)
+    try:
+        soup = create_soup(session, whats_new_url)
+    except Exception as error:
+        raise FailedSoupCreationException(
+            FAILED_CREATE_SOUP_INFO.format(
+                url=whats_new_url,
+                error=error
+            )
+        )
     main_div = find_tag(
         soup,
         'section',
@@ -53,7 +62,15 @@ def whats_new(session):
         a_tag = section.find('a')
         href = a_tag['href']
         link = urljoin(whats_new_url, href)
-        soup = create_soup(session, link)
+        try:
+            soup = create_soup(session, link)
+        except Exception as error:
+            raise FailedSoupCreationException(
+                FAILED_CREATE_SOUP_INFO.format(
+                    url=MAIN_DOC_URL,
+                    error=error
+                )
+            )
         h1_tag = find_tag(soup, 'h1')
         dl_tag = find_tag(soup, 'dl')
         dl_text = dl_tag.text.replace('\n', ' ')
@@ -62,7 +79,15 @@ def whats_new(session):
 
 
 def latest_versions(session):
-    soup = create_soup(session, MAIN_DOC_URL)
+    try:
+        soup = create_soup(session, MAIN_DOC_URL)
+    except Exception as error:
+        raise FailedSoupCreationException(
+            FAILED_CREATE_SOUP_INFO.format(
+                url=MAIN_DOC_URL,
+                error=error
+            )
+        )
     sidebar = find_tag(
         soup,
         'div',
@@ -89,7 +114,15 @@ def latest_versions(session):
 
 
 def download(session):
-    soup = create_soup(session, DOWNLOAD_URL)
+    try:
+        soup = create_soup(session, DOWNLOAD_URL)
+    except Exception as error:
+        raise FailedSoupCreationException(
+            FAILED_CREATE_SOUP_INFO.format(
+                url=DOWNLOAD_URL,
+                error=error
+            )
+        )
     link_table = find_tag(soup, 'table')
     pdf_a4_tag = find_tag(
         link_table,
@@ -110,7 +143,15 @@ def download(session):
 
 
 def pep(session):
-    soup = create_soup(session, PEP_LIST_URL)
+    try:
+        soup = create_soup(session, PEP_LIST_URL)
+    except Exception as error:
+        raise FailedSoupCreationException(
+            FAILED_CREATE_SOUP_INFO.format(
+                url=PEP_LIST_URL,
+                error=error
+            )
+        )
     index = find_tag(
         soup,
         'section',
@@ -134,7 +175,15 @@ def pep(session):
             ))
         link = find_tag(pep_line, 'a')['href']
         pep_line_link = urljoin(PEP_LIST_URL, link)
-        soup = create_soup(session, pep_line_link)
+        try:
+            soup = create_soup(session, pep_line_link)
+        except Exception as error:
+            raise FailedSoupCreationException(
+                FAILED_CREATE_SOUP_INFO.format(
+                    url=pep_line_link,
+                    error=error
+                )
+            )
         dl_tag = find_tag(soup, 'dl')
         status = dl_tag.find(string='Status')
         if not status:
@@ -152,9 +201,8 @@ def pep(session):
                 )
             ))
         status_counter += 1
-    if exceptions:
-        for exception in exceptions:
-            raise exception
+    for exception in exceptions:
+        logging.info(exception)
     if pep_count != status_counter:
         logging.error(
             f'\n Ошибка в сумме:\n'
