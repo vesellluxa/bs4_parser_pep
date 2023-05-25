@@ -30,7 +30,8 @@ PARSER_START_LOGGING_INFO = 'Парсер запущен!'
 PARSER_START_ARGS_LOGGING_INFO = 'Аргументы при запуске: {args}'
 PARSER_COMPLETED_WORK = 'Парсер завершил работу!'
 FAILED_CREATE_SOUP_INFO = 'Не удалось создать SOUP! {url}, {error}'
-PARSER_WORK_ERROR = 'Во время выполнения работы парсера произошла ошибка! {error}'
+PARSER_WORK_ERROR = ('Во время выполнения работы парсера'
+                     ' произошла ошибка! {error}')
 
 
 def whats_new(session):
