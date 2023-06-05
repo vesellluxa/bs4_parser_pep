@@ -52,6 +52,7 @@ def whats_new(session):
         attrs={'class': 'toctree-l1'}
     )
     results = [('Ссылка на статью', 'Заголовок', 'Редактор, Автор')]
+    exceptions = []
     for section in tqdm(sections_by_python):
         a_tag = section.find('a')
         href = a_tag['href']
@@ -59,16 +60,18 @@ def whats_new(session):
         try:
             soup = create_soup(session, link)
         except Exception as error:
-            raise FailedSoupCreationException(
+            exceptions.append(FailedSoupCreationException(
                 FAILED_CREATE_SOUP_INFO.format(
                     url=MAIN_DOC_URL,
                     error=error
                 )
-            )
+            ))
         h1_tag = find_tag(soup, 'h1')
         dl_tag = find_tag(soup, 'dl')
         dl_text = dl_tag.text.replace('\n', ' ')
         results.append((link, h1_tag.text, dl_text))
+    for exception in exceptions:
+        logging.info(exception)
     return results
 
 
@@ -148,12 +151,11 @@ def pep(session):
         try:
             soup = create_soup(session, pep_line_link)
         except Exception as error:
-            raise FailedSoupCreationException(
+            exceptions.append(ValueError(
                 FAILED_CREATE_SOUP_INFO.format(
-                    url=pep_line_link,
+                    url=MAIN_DOC_URL,
                     error=error
-                )
-            )
+                )))
         dl_tag = find_tag(soup, 'dl')
         status = dl_tag.find(string='Status')
         if not status:
