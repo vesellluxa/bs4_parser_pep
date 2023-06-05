@@ -20,3 +20,7 @@ class PrintLoggingInfo(Exception):
 
 class FailedSoupCreationException(Exception):
     pass
+
+
+class BadRequestException(Exception):
+    pass

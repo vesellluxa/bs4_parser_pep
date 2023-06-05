@@ -36,15 +36,7 @@ PARSER_WORK_ERROR = ('Во время выполнения работы парс
 
 def whats_new(session):
     whats_new_url = urljoin(MAIN_DOC_URL, 'whatsnew/')
-    try:
-        soup = create_soup(session, whats_new_url)
-    except Exception as error:
-        raise FailedSoupCreationException(
-            FAILED_CREATE_SOUP_INFO.format(
-                url=whats_new_url,
-                error=error
-            )
-        )
+    soup = create_soup(session, whats_new_url)
     main_div = find_tag(
         soup,
         'section',
@@ -81,15 +73,7 @@ def whats_new(session):
 
 
 def latest_versions(session):
-    try:
-        soup = create_soup(session, MAIN_DOC_URL)
-    except Exception as error:
-        raise FailedSoupCreationException(
-            FAILED_CREATE_SOUP_INFO.format(
-                url=MAIN_DOC_URL,
-                error=error
-            )
-        )
+    soup = create_soup(session, MAIN_DOC_URL)
     sidebar = find_tag(
         soup,
         'div',
@@ -116,15 +100,7 @@ def latest_versions(session):
 
 
 def download(session):
-    try:
-        soup = create_soup(session, DOWNLOAD_URL)
-    except Exception as error:
-        raise FailedSoupCreationException(
-            FAILED_CREATE_SOUP_INFO.format(
-                url=DOWNLOAD_URL,
-                error=error
-            )
-        )
+    soup = create_soup(session, DOWNLOAD_URL)
     link_table = find_tag(soup, 'table')
     pdf_a4_tag = find_tag(
         link_table,
