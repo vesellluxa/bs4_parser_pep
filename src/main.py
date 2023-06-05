@@ -8,7 +8,7 @@ from urllib.parse import urljoin
 from configs import configure_argument_parser, configure_logging
 from constants import (BASE_DIR, EXPECTED_STATUS, MAIN_DOC_URL, PEP_LIST_URL,
                        DOWNLOAD_URL, DOWNLOADS)
-from exceptions import NothingFoundException, FailedSoupCreationException
+from exceptions import NothingFoundException
 from outputs import control_output
 from utils import find_tag, create_soup
 
@@ -52,25 +52,26 @@ def whats_new(session):
         attrs={'class': 'toctree-l1'}
     )
     results = [('Ссылка на статью', 'Заголовок', 'Редактор, Автор')]
-    exceptions = []
+    exceptions_info = []
     for section in tqdm(sections_by_python):
         a_tag = section.find('a')
         href = a_tag['href']
         link = urljoin(whats_new_url, href)
         try:
             soup = create_soup(session, link)
-        except Exception as error:
-            exceptions.append(FailedSoupCreationException(
+        except ValueError as error:
+            exceptions_info.append(
                 FAILED_CREATE_SOUP_INFO.format(
                     url=MAIN_DOC_URL,
                     error=error
                 )
-            ))
+            )
+            continue
         h1_tag = find_tag(soup, 'h1')
         dl_tag = find_tag(soup, 'dl')
         dl_text = dl_tag.text.replace('\n', ' ')
         results.append((link, h1_tag.text, dl_text))
-    for exception in exceptions:
+    for exception in exceptions_info:
         logging.info(exception)
     return results
 
@@ -134,7 +135,7 @@ def pep(session):
     pep_lines = pep_list.find_all('tr')
     pep_count, status_counter = 0, 0
     results = [('Статус', 'Количество')]
-    exceptions = []
+    exceptions_info = []
     for pep_line in tqdm(pep_lines):
         pep_count += 1
         short_status = pep_line.find('td').text[1:]
@@ -142,38 +143,39 @@ def pep(session):
             status_ext = EXPECTED_STATUS[short_status]
         except KeyError:
             status_ext = []
-            exceptions.append(ValueError(
+            exceptions_info.append(
                 PEP_LOGGING_INFO.format(short_status=short_status,
                                         pep_line=pep_line)
-            ))
+            )
         link = find_tag(pep_line, 'a')['href']
         pep_line_link = urljoin(PEP_LIST_URL, link)
         try:
             soup = create_soup(session, pep_line_link)
-        except Exception as error:
-            exceptions.append(ValueError(
+        except ValueError as error:
+            exceptions_info.append(
                 FAILED_CREATE_SOUP_INFO.format(
                     url=MAIN_DOC_URL,
                     error=error
-                )))
+                ))
+            continue
         dl_tag = find_tag(soup, 'dl')
         status = dl_tag.find(string='Status')
         if not status:
-            exceptions.append(ValueError(NO_STATUS_LOGGING_INFO.format(
+            exceptions_info.append(ValueError(NO_STATUS_LOGGING_INFO.format(
                 pep_line_link=pep_line_link
             )))
         status = status.find_parent()
         status_num = status.next_sibling.next_sibling.string
         if status_num not in status_ext:
-            exceptions.append(ValueError(
+            exceptions_info.append(
                 STATUS_MISMATCH_LOGGING_INFO.format(
                     pep_line_link=pep_line_link,
                     status_num=status_num,
                     status_ext=status_ext
                 )
-            ))
+            )
         status_counter += 1
-    for exception in exceptions:
+    for exception in exceptions_info:
         logging.info(exception)
     if pep_count != status_counter:
         logging.error(

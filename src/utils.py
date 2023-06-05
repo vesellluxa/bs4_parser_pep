@@ -1,7 +1,7 @@
 from bs4 import BeautifulSoup
 from requests import RequestException
 
-from exceptions import ParserFindTagException, BadRequestException
+from exceptions import ParserFindTagException
 
 EMPTY_RESPONSE_MESSAGE = 'Ответ от {url} не получен.'
 REQUEST_EXCEPTION_MESSAGE = 'Ошибка при загрузке страницы! {url}, {error}'
@@ -14,7 +14,7 @@ def get_response(session, url, encoding='utf-8'):
         response.encoding = encoding
         return response
     except RequestException as error:
-        raise BadRequestException(
+        raise ValueError(
             REQUEST_EXCEPTION_MESSAGE.format(url=url, error=error),
         )
 
