@@ -59,7 +59,7 @@ def whats_new(session):
         link = urljoin(whats_new_url, href)
         try:
             soup = create_soup(session, link)
-        except ValueError as error:
+        except ConnectionError as error:
             exceptions_info.append(
                 FAILED_CREATE_SOUP_INFO.format(
                     url=MAIN_DOC_URL,
@@ -151,7 +151,7 @@ def pep(session):
         pep_line_link = urljoin(PEP_LIST_URL, link)
         try:
             soup = create_soup(session, pep_line_link)
-        except ValueError as error:
+        except ConnectionError as error:
             exceptions_info.append(
                 FAILED_CREATE_SOUP_INFO.format(
                     url=MAIN_DOC_URL,

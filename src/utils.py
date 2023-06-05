@@ -14,7 +14,7 @@ def get_response(session, url, encoding='utf-8'):
         response.encoding = encoding
         return response
     except RequestException as error:
-        raise ValueError(
+        raise ConnectionError(
             REQUEST_EXCEPTION_MESSAGE.format(url=url, error=error),
         )
 
